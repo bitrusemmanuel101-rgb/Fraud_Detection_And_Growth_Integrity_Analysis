@@ -1,0 +1,19 @@
+fraud by card type
+ with Fraud_t as(
+
+SELECT
+
+   card_type,
+    sum(transaction_amount) as Gross_TPV,
+    sum(case when fraud_label =1 then transaction_amount else 0 end ) as Fraud_TPV,
+    sum(CASE WHEN fraud_label = 1 then transaction_amount else 0 end)
+     * 1.00 / sum(transaction_amount) * 100 as Fraud_rate
+     
+FROM
+    transactions_dataset
+    GROUP by card_type
+)
+SELECT 
+  *
+from fraud_t
+order BY Fraud_rate DESC  
