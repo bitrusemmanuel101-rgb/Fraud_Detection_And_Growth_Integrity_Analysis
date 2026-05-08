@@ -1,4 +1,4 @@
-fraud by card type
+--fraud by card type
  with Fraud_t as(
 
 SELECT
@@ -10,7 +10,7 @@ SELECT
      * 1.00 / sum(transaction_amount) * 100 as Fraud_rate
      
 FROM
-    transactions_dataset
+    transactions_dataset_main
     GROUP by card_type
 )
 SELECT 

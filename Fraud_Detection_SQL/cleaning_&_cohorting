@@ -1,0 +1,60 @@
+--CONNECTING THE TRANSACTIONS_DATASET CSV TO POSTGRESSQL
+
+\copy transactions_dataset FROM 'C:\Users\bitru\OneDrive\Desktop\TransactionDataset\synthetic_fraud_dataset.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',', ENCODING 'UTF8');
+
+/*
+Executive Request: 
+Can we trust our growth?
+Do we have fraudulent operations? where?
+Are newer cohorts becoming riskier?*/
+
+-- REMOVING DATASET WITH ZERO TRANSACTION AMOUNT
+-- 6 rows with zero transaction amount
+with transactions_dataset as (
+    select 
+         *
+    from 
+        transactions_dataset
+    where 
+        transaction_amount > 0
+)
+-- CHECKING FOR DUPLICATES
+
+,
+dup_check as (
+    select
+         *,
+        ROW_NUMBER ( ) over (partition by transaction_id, user_id, Transaction_Amount order by date)
+    as  DUP_FLAG 
+    from
+         transactions_dataset
+)
+-- CREATING CLEAN TRANSACTION_DATASET TABLE
+-- 99996 duplicates
+select
+     *
+into 
+    transactions_dataset_MAIN
+from
+     dup_check
+where 
+    DUP_FLAG =1
+
+SELECT * 
+FROM transactions_dataset_MAIN
+
+
+
+-- user_cohort_by_transaction_date
+SELECT
+    user_id,
+    min(date_trunc('month', date)) as Cohort_month
+into user_cohort
+FROM transactions_dataset_main
+GROUP by user_id
+
+
+
+
+
+
