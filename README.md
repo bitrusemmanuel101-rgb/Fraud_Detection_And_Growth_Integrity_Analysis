@@ -440,7 +440,7 @@ group by
 | 9            | 32         |
 | 10           | 32         |
 | 11           | 31         |
-*I have limited the table to the important values for this analysis.*
+*I have limited the table to the average fraud rates in each cohort generation for this analysis. Full cohort fraud analysis is visualized in the tableau presentation*
 
 #### **User Acquisition Quality Over Time**
 
