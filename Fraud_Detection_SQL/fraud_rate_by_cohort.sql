@@ -30,7 +30,7 @@ select
     cohort_month,
     count(transaction_amount) as Total_transactions,
     sum(fraud_label) as fraud_transactions,
-    (sum(fraud_label)*1.0/ count(transaction_amount)*100)
+    (sum(fraud_label)*1.0/ count(transaction_amount))
      as fraud_rate
 from
     Cohort_index_data as ci  
