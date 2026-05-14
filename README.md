@@ -110,7 +110,7 @@ from
 ```
 ---
 ## Answer
-
+![Gross TPV, Net TPV, Fraud TPV, Fraud rate](Fraud_Detection_SQL\assets\kpi.PNG) 
 - Total Payment Value (TPV) of the daaset: $4,970,551
 - Net TPV: $3,368,933
 - Fraud TPV: $1,601,618
@@ -150,7 +150,7 @@ SELECT
     sum(transaction_amount) as Gross_TPV,
     sum(case when fraud_label =1 then transaction_amount else 0 end ) as Fraud_TPV,
     sum(CASE WHEN fraud_label = 1 then transaction_amount else 0 end)
-     * 1.00 / sum(transaction_amount) * 100 as Fraud_rate
+     * 1.00 / sum(transaction_amount) as Fraud_rate
      
 FROM
     transactions_dataset_main
@@ -163,6 +163,10 @@ from
 order BY 
     Fraud_rate DESC;
 ``` 
+
+![Fraud Rate By Merchant Category](Fraud_Detection_SQL\assets\Merchants.PNG) 
+
+*A Funnel Showing The Fraud Percent By Merchants*
 - Electronics → ~32.7% fraud
 - Travel → ~32.5% fraud
 - Groceries → ~32.4% fraud
@@ -190,7 +194,7 @@ SELECT
     sum(transaction_amount) as Gross_TPV,
     sum(case when fraud_label =1 then transaction_amount else 0 end ) as Fraud_TPV,
     sum(CASE WHEN fraud_label = 1 then transaction_amount else 0 end)
-     * 1.00 / sum(transaction_amount) * 100 as Fraud_rate
+     * 1.00 / sum(transaction_amount)  as Fraud_rate
      
 FROM
     transactions_dataset_main
@@ -203,6 +207,10 @@ from
 order BY 
     Fraud_rate DESC
 ```
+
+![Fraud Rates By Geography](Fraud_Detection_SQL\assets\Geography.PNG)
+
+*A Treemap Showing Fraud Rate in Each Location*
 - Tokyo → ~33.0%
 - London → ~ 32.5%
 - New York → ~ 32.5%
@@ -228,7 +236,7 @@ SELECT
     sum(transaction_amount) as Gross_TPV,
     sum(case when fraud_label =1 then transaction_amount else 0 end ) as Fraud_TPV,
     sum(CASE WHEN fraud_label = 1 then transaction_amount else 0 end)
-     * 1.00 / sum(transaction_amount) * 100 as Fraud_rate
+     * 1.00 / sum(transaction_amount)  as Fraud_rate
      
 FROM
     transactions_dataset_main
@@ -241,7 +249,9 @@ from
 order BY 
     Fraud_rate DESC
 ``` 
+![Fraud Through Authentication Methods](Fraud_Detection_SQL\assets\authentication.PNG)
 
+*Bar Chart Showing Fraud Rate By Authentication Methods*
 - Biometric → 32.6%
 - OTP → 32.5%
 - Password → 32.4%
@@ -280,7 +290,7 @@ SELECT
     sum(transaction_amount) as Gross_TPV,
     sum(case when fraud_label =1 then transaction_amount else 0 end ) as Fraud_TPV,
     sum(CASE WHEN fraud_label = 1 then transaction_amount else 0 end)
-     * 1.00 / sum(transaction_amount) * 100 as Fraud_rate
+     * 1.00 / sum(transaction_amount)  as Fraud_rate
      
 FROM
     transactions_dataset_main
@@ -294,6 +304,9 @@ order BY
     Fraud_rate DESC; 
 ```
 
+![Fraud Rate by Device Types](Fraud_Detection_SQL\assets\device_type.PNG)
+
+*Pie Chart Showing Fraud Rate by Devioce Types*
 - Mobile → 32.6% fraud
 - Tablet → 32.2% fraud
 - Laptop → 31.7% fraud
@@ -315,7 +328,7 @@ SELECT
     sum(transaction_amount) as Gross_TPV,
     sum(case when fraud_label =1 then transaction_amount else 0 end ) as Fraud_TPV,
     sum(CASE WHEN fraud_label = 1 then transaction_amount else 0 end)
-     * 1.00 / sum(transaction_amount) * 100 as Fraud_rate
+     * 1.00 / sum(transaction_amount)  as Fraud_rate
      
 FROM
     transactions_dataset_main
@@ -328,6 +341,10 @@ from
 order BY 
     Fraud_rate DESC;  
 ```
+
+![Fraud Rate by Card Types](Fraud_Detection_SQL\assets\card_type.PNG)
+
+*Donut Chart SHopwing Fraud Rate By Card Types*
 
 - Discover → 32.6% fraud
 - Amex → 32.4% fraud
@@ -351,7 +368,7 @@ select
         WHEN risk_score >=0.4 then 'Medium Risk'
         else 'Low Risk' end as Risk_band,
     sum(case when fraud_label = 1 then Transaction_Amount end) *1.00 /
-    sum(transaction_amount)*100 as fraud_rate
+    sum(transaction_amount) as fraud_rate
 from 
     transactions_dataset_main
 GROUP BY
@@ -359,6 +376,11 @@ GROUP BY
 ORDER BY
     fraud_rate DESC
 ```
+
+![Risk Score Vs Fraud rate](Fraud_Detection_SQL\assets\RISK.PNG)
+
+*Risk Detection Engine Properly Detects Activities With High Risks*
+
 
 - High Risk (risk score 8>) → 80.2% fraud
 - Medium Risk (risk score 4>) → 20.2% fraud
@@ -412,7 +434,7 @@ select
     cohort_month,
     count(transaction_amount) as Total_transactions,
     sum(fraud_label) as fraud_transactions,
-    round(sum(fraud_label)*1.0/ count(transaction_amount)*100)
+    round(sum(fraud_label)*1.0/ count(transaction_amount))
      as fraud_rate
 from
     Cohort_index_data as ci  
@@ -423,29 +445,16 @@ on
 group by
     ci.Cohort_index, cohort_month
 ```
+![Fraud Rates Accross Cohort Lifecycle](Fraud_Detection_SQL\assets\cohort.PNG)
 
 
 
-| cohort_index | fraud_rate |
-| ------------ | ---------- |
-| 0            | 32         |
-| 1            | 32         |
-| 2            | 32         |
-| 3            | 32         |
-| 4            | 32         |
-| 5            | 32         |
-| 6            | 32         |
-| 7            | 32         |
-| 8            | 31         |
-| 9            | 32         |
-| 10           | 32         |
-| 11           | 31         |
-*I have limited the table to the average fraud rates in each cohort generation for this analysis. Full cohort fraud analysis is visualized in the tableau presentation*
+*Fraud Detection Cohort Analysis Report, Showing the Progressive Rates of Fraud Accross Cohort Lifecycle*
 
 #### **User Acquisition Quality Over Time**
 
 
-Cohort fraud rates remained consistently high (~31–32%), with the last generation showing a reduction in fraud intensity. but overall, the range is same.
+Cohort fraud rates remained consistently high, with the last generation showing a reduction in fraud intensity. but overall, the range is same.
 
 
 This reinforced the finding that fraud exposure was system-wide rather than segment or cohort-specific. 
