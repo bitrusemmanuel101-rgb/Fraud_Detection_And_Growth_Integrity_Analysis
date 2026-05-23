@@ -11,18 +11,21 @@ As transaction volumes scale, leadership needs confidence that reported growth r
 
 This analysis was initiated in response to a set of executive concerns around growth quality and risk exposure across the payment system. The goal was to move beyond surface-level reporting and assess whether growth signals are trustworthy, whether fraud is materially present within operational flows, and how risk is distributed across different user segments and acquisition cohorts.
 
-## The Questions Answered Through This Project Are:
+## The Businness Questions:
 
 1. Can we trust our growth?
-2. Do we have fraudulent operations? Where? And how heavy are they accross segments?
-3. Are newer cohorts becoming riskier?
+2. Are newer cohorts becoming riskier?
+3. Do we have fraudulent operations? Where? And how heavy are they accross segments?
 
 
-# **Tools Used**
-- SQL (PostgreSQL)
-- VS Code
-- Git & GitHub
-- Microsoft Power BI
+## Context
+
+**Domain:** Payments Operations / Fraud Analytics  
+**Tools:** SQL (PostgreSQL), Power BI, Git Hub, VS code  
+**Dataset:** Transactions dataset with fraud labels, user cohorts, device types, authentication methods, merchant data, geographic data, and risk scores  
+**Scope:** Cohort lifecycle fraud analysis across full transaction history
+
+
 
 
 # **Data Preparation**
@@ -122,9 +125,70 @@ We cannot measure our growth to be equal to our revenue.
 
 For a finTech Industry, although there isn't a written law, the red zone of fraud rates are anything greater than 1%. and we are experiencing a 32.2% fraud rate. This should be prioritized as CRITICAL.
 
+---
+## **Question 2: Are newer cohorts becoming riskier?**
+
+This question delves into the first transaction of every user ffom the sstart of the year till the end, for the purpose of tracking fradulent activities from each ,month to know if fraudulent activities are increasing with new aqcuisition of users.
+
+```sql
+
+---Created a temp table called Cohort_index_table to contain my cohort index
+
+select
+    uc.cohort_month,
+    t.user_id,
+    date_trunc('month', t.date) as transaction_month,
+    (
+    extract(year from age(date_trunc('month', t.date), uc.cohort_month))*12 
+    +
+    extract(month from age(date_trunc('month', t.date), uc.cohort_month))
+    ) as Cohort_index
+into
+    Cohort_index_data
+from
+    transactions_dataset_main as t 
+join
+    user_cohort as uc  
+on
+    t.user_id = uc.user_id
+order by
+    t.user_id, transaction_month ;
+
+--- Calculated fraud rate by cohort index
+select
+    Cohort_index,
+    cohort_month,
+    count(transaction_amount) as Total_transactions,
+    sum(fraud_label) as fraud_transactions,
+    round(sum(fraud_label)*1.0/ count(transaction_amount))
+     as fraud_rate
+from
+    Cohort_index_data as ci  
+join
+    transactions_dataset_main tm
+on 
+     tm.user_id = ci.user_id
+group by
+    ci.Cohort_index, cohort_month
+```
+![Fraud Rates Accross Cohort Lifecycle](Fraud_Detection_SQL/assets/cohort.PNG)
 
 
-## **Question 2: Do we have fraudulent operations, where? and how heavy are they across segments?**
+
+*Fraud Detection Cohort Analysis Report, Showing the Progressive Rates of Fraud Accross Cohort Lifecycle*
+
+#### **User Acquisition Quality Over Time**
+
+
+Cohort fraud rates remained consistently high, with the last generation showing a reduction in fraud intensity. but overall, the range is same.
+
+
+ 
+
+
+Newer cohorts showed lower transaction volume due to shorter lifecycle maturity.
+
+## **Question 3: Do we have fraudulent operations, where? and how heavy are they across segments?**
 
 This question investigates the presence and distribution of fraud across different dimensions.
 
@@ -397,71 +461,12 @@ But the overall fraud rate is still ~32%
 - That means high-risk transactions are still going through
 
 
+This reinforced the finding that fraud exposure was system-wide rather than segment or cohort-specific.
 
 
 
----
-## **Question 3: Are newer cohorts becoming riskier?**
-
-This question delves into the first transaction of every user ffom the sstart of the year till the end, for the purpose of tracking fradulent activities from each ,month to know if fraudulent activities are increasing with new aqcuisition of users.
-
-```sql
-
----Created a temp table called Cohort_index_table to contain my cohort index
-
-select
-    uc.cohort_month,
-    t.user_id,
-    date_trunc('month', t.date) as transaction_month,
-    (
-    extract(year from age(date_trunc('month', t.date), uc.cohort_month))*12 
-    +
-    extract(month from age(date_trunc('month', t.date), uc.cohort_month))
-    ) as Cohort_index
-into
-    Cohort_index_data
-from
-    transactions_dataset_main as t 
-join
-    user_cohort as uc  
-on
-    t.user_id = uc.user_id
-order by
-    t.user_id, transaction_month ;
-
---- Calculated fraud rate by cohort index
-select
-    Cohort_index,
-    cohort_month,
-    count(transaction_amount) as Total_transactions,
-    sum(fraud_label) as fraud_transactions,
-    round(sum(fraud_label)*1.0/ count(transaction_amount))
-     as fraud_rate
-from
-    Cohort_index_data as ci  
-join
-    transactions_dataset_main tm
-on 
-     tm.user_id = ci.user_id
-group by
-    ci.Cohort_index, cohort_month
-```
-![Fraud Rates Accross Cohort Lifecycle](Fraud_Detection_SQL/assets/cohort.PNG)
 
 
-
-*Fraud Detection Cohort Analysis Report, Showing the Progressive Rates of Fraud Accross Cohort Lifecycle*
-
-#### **User Acquisition Quality Over Time**
-
-
-Cohort fraud rates remained consistently high, with the last generation showing a reduction in fraud intensity. but overall, the range is same.
-
-
-This reinforced the finding that fraud exposure was system-wide rather than segment or cohort-specific. 
-
-
-Newer cohorts showed lower transaction volume due to shorter lifecycle maturity.
 
 
 
@@ -489,6 +494,8 @@ That’s not a data problem.
 
 Despite strong fraud detection capabilities, the system exhibited a ~32% fraud exposure rate due to ineffective enforcement of risk signals. Fraud was uniformly distributed across all segments, indicating a systemic control failure at the transaction decisioning layer rather than localized risk pockets.
 
+
+
 **This system is optimized for:**
 
 - Maximizing transaction volume (TPV)
@@ -514,13 +521,11 @@ The platform successfully identified high-risk transactions, but risky payments 
 
 Introduce automated decision rules tied directly to risk bands.
 
-Risk Band |	Recommended Action
-
-Low Risk -	Auto approve
-
-Medium Risk -	Step-up authentication
-
-High Risk -	Auto decline or manual review
+| Risk Band | Recommended Action |
+|-----------|-------------------|
+| Low Risk | Auto-approve |
+| Medium Risk | Step-up authentication (OTP + review) |
+| High Risk | Auto-decline or mandatory manual review |
 
 - **Business Impact**
 
@@ -538,19 +543,10 @@ Authentication methods showed similar fraud rates, indicating low effectiveness.
 
 - **Recommendation**
 
-Move from:
+Move from universal authentication applied equally to all transactions, to risk-triggered authentication calibrated to transaction risk level.
 
-universal authentication
-
-to:
-
-risk-triggered authentication
-
-Example:
-
-Low-risk → frictionless checkout
-
-High-risk → biometric + OTP + review
+- Low risk → Frictionless checkout
+- High risk → Biometric + OTP + review queue
 
 - 
 **Business Impact**
@@ -563,7 +559,7 @@ Higher conversion efficiency
 
 --- 
 
-### 3. **Strengthen Transaction-Level Controls Instead of User-Level Blocking**
+### 3. **Strengthen Transaction-Level Controls Over User-Level Blocking**
 
 - **Problem**
 
@@ -571,19 +567,13 @@ Fraud was widely distributed across users rather than concentrated among isolate
 
 - **Recommendation**
 
-Focus less on:
+Since fraud was distributed across users rather than concentrated in isolated bad actors, simple blacklisting is insufficient.
 
-simple user blacklisting
-
-and more on:
-
-transaction behavior analysis
-
-velocity checks
-
-adaptive risk scoring
-
-anomaly detection
+Focus on:
+- Transaction behavior analysis
+- Velocity checks
+- Adaptive risk scoring
+- Anomaly detection at transaction level
 
 - **Business Impact**
 
@@ -602,22 +592,7 @@ Revenue growth and fraud management were operating independently.
 
 - **Recommendation**
 
-Create cross-functional alignment between:
-
-Revenue Operations
-
-Payments Operations
-
- Risk & Fraud
-
-Product
-
-
-Finance
-
-- **Focus:**
-
-balancing growth with revenue quality.
+Create cross-functional alignment between Revenue Operations, Payments Operations, Risk & Fraud, Product, and Finance — focused on balancing growth with revenue quality.
 
 - **Business Impact**
 
