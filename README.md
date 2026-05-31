@@ -229,7 +229,7 @@ order BY
     Fraud_rate DESC;
 ``` 
 
-![Fraud Rate By Merchant Category](Fraud_Detection_SQL/assets/Merchants.PNG) 
+
 
 *A Funnel Showing The Fraud Percent By Merchants*
 - Electronics → ~32.7% fraud
@@ -273,7 +273,7 @@ order BY
     Fraud_rate DESC
 ```
 
-![Fraud Rates By Geography](Fraud_Detection_SQL/assets/Geography.PNG)
+
 
 *A Treemap Showing Fraud Rate in Each Location*
 - Tokyo → ~33.0%
@@ -314,7 +314,7 @@ from
 order BY 
     Fraud_rate DESC
 ``` 
-![Fraud Through Authentication Methods](Fraud_Detection_SQL/assets/authentication.PNG)
+
 
 *Bar Chart Showing Fraud Rate By Authentication Methods*
 - Biometric → 32.6%
@@ -369,7 +369,7 @@ order BY
     Fraud_rate DESC; 
 ```
 
-![Fraud Rate by Device Types](Fraud_Detection_SQL/assets/device_type.PNG)
+
 
 *Pie Chart Showing Fraud Rate by Devioce Types*
 - Mobile → 32.6% fraud
@@ -407,7 +407,7 @@ order BY
     Fraud_rate DESC;  
 ```
 
-![Fraud Rate by Card Types](Fraud_Detection_SQL/assets/card_type.PNG)
+
 
 *Donut Chart SHopwing Fraud Rate By Card Types*
 
@@ -442,7 +442,7 @@ ORDER BY
     fraud_rate DESC
 ```
 
-![Risk Score Vs Fraud rate](Fraud_Detection_SQL/assets/RISK.PNG)
+
 
 *Risk Detection Engine Properly Detects Activities With High Risks*
 
@@ -614,3 +614,9 @@ Despite strong fraud detection signals, weak enforcement mechanisms allowed high
 # **Closing**
 
 This analysis demonstrated how transaction growth can mask underlying revenue quality issues, and highlighted the importance of integrating risk intelligence directly into operational payment decisioning.
+
+
+---
+
+*Part of the Emmanuel Bitrus Payments & Revenue Operations Portfolio*
+*→ [Back to Portfolio](https://lorenferatacado.my.canva.site/bitrusemmanuel-salesops-portfolio)*
